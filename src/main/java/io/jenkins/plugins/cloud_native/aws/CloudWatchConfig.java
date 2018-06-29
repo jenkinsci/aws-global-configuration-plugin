@@ -51,6 +51,30 @@ public class CloudWatchConfig extends AbstractAws {
         super(config);
     }
 
+    /**
+     *
+     * @return an AWSLogsClientBuilder using the configured region
+     * @throws IOException
+     */
+    public AWSLogsClientBuilder getAWSLogsClientBuilder() throws IOException {
+        return getAWSLogsClientBuilder(getConfig().getRegion());
+    }
+
+    /**
+     *
+     * @return an AWSLogsClientBuilder using the passed region
+     * @throws IOException
+     */
+    private AWSLogsClientBuilder getAWSLogsClientBuilder(String region) throws IOException {
+        AWSLogsClientBuilder builder = AWSLogsClientBuilder.standard();
+        if (StringUtils.isNotBlank(region)) {
+            builder = builder.withRegion(region);
+        }
+        AWSStaticCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(
+                getConfig().sessionCredentials(builder));
+        return builder.withCredentials(credentialsProvider);
+    }
+
     public FormValidation doCheckLogGroupName(@QueryParameter String logGroup) {
         FormValidation ret = FormValidation.ok();
         if (StringUtils.isBlank(logGroup)) {
@@ -62,13 +86,7 @@ public class CloudWatchConfig extends AbstractAws {
     public FormValidation validate(String logGroupName, String region, String credentialsId) throws IOException {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
 
-        AWSLogsClientBuilder builder = AWSLogsClientBuilder.standard();
-        if (StringUtils.isNotBlank(region)) {
-            builder = builder.withRegion(region);
-        }
-        AWSStaticCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(
-                getConfig().sessionCredentials(builder));
-        AWSLogs client = builder.withCredentials(credentialsProvider).build();
+        AWSLogs client = getAWSLogsClientBuilder(region).build();
 
         FormValidation ret = FormValidation.ok("success");
         try {
