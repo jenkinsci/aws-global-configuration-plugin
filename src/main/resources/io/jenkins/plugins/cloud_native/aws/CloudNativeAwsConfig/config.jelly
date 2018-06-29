@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:section title="${%Amazon settings}">
+        <f:entry title="${%S3 Bucket Name}" field="container">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="${%S3 Base Prefix}" field="prefix">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="${%Log group}" field="logGroupName">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="${%Region}" field="region">
+            <f:select/>
+        </f:entry>
+        <f:entry title="${%Amazon Credentials}" field="credentialsId">
+            <c:select />
+        </f:entry>
+        <f:entry title="${%Delete Artifacts in S3}" field="deleteArtifacts">
+            <f:checkbox readonly="true"/>
+        </f:entry>
+        <f:entry title="${%Delete Stashes in S3}" field="deleteStashes">
+            <f:checkbox readonly="true"/>
+        </f:entry>
+        <f:validateButton title="Validate configuration" progress="Validating..." method="validate"
+                          with="container,prefix,logGroupName,region,credentialsId"/>
+        <f:validateButton title="Create S3 Bucket from configuration" progress="Creating S3 Bucket..." method="createS3Bucket"
+                          with="container,prefix,region,credentialsId"/>
+    </f:section>
+</j:jelly>

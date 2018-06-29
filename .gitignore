@@ -1,0 +1,10 @@
+.factorypath
+target
+work
+.DS_Store
+.classpath
+.project
+.settings/
+.stignore
+.vscode/
+protojep.adoc
