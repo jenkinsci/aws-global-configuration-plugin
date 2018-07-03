@@ -31,7 +31,9 @@ import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
+import hudson.model.Descriptor;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -65,7 +67,7 @@ import jenkins.model.Jenkins;
 /**
  * Store the AWS configuration to save it on a separate file
  */
-@Extension
+@Extension @Symbol("credentials")
 public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
 
     private static final Logger LOGGER = Logger.getLogger(CredentialsAwsGlobalConfiguration.class.getName());
