@@ -25,9 +25,7 @@
 package io.jenkins.plugins.cloud_native.aws;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -61,19 +59,19 @@ import hudson.model.Failure;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.model.GlobalConfiguration;
+import jenkins.model.GlobalConfigurationCategory;
 import jenkins.model.Jenkins;
 
 /**
  * Store the AWS configuration to save it on a separate file
  */
 @Extension
-public class CloudNativeAwsConfig extends GlobalConfiguration {
+public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
 
-    private static final Logger LOGGER = Logger.getLogger(CloudNativeAwsConfig.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CredentialsAwsGlobalConfiguration.class.getName());
 
     /**
-     * field to fake S3 endpoint on test.
+     * field to fake endpoint on test.
      */
     static AwsClientBuilder.EndpointConfiguration ENDPOINT;
 
@@ -81,23 +79,8 @@ public class CloudNativeAwsConfig extends GlobalConfiguration {
      * Session token duration in seconds.
      */
     @SuppressWarnings("FieldMayBeFinal")
-    private static int SESSION_DURATION = Integer.getInteger(CloudNativeAwsConfig.class.getName() + ".sessionDuration",
+    private static int SESSION_DURATION = Integer.getInteger(CredentialsAwsGlobalConfiguration.class.getName() + ".sessionDuration",
             3600);
-
-    /**
-     * Name of the S3 Bucket for artifacts
-     */
-    private String container;
-
-    /**
-     * Prefix to use for S3 files, use to be a folder.
-     */
-    private String prefix;
-
-    /**
-     * Name of the CloudWatch log group.
-     */
-    private String logGroupName;
 
     /**
      * force the region to use for the presigned S3 URLs generated.
@@ -111,41 +94,8 @@ public class CloudNativeAwsConfig extends GlobalConfiguration {
     private String credentialsId;
 
     @DataBoundConstructor
-    public CloudNativeAwsConfig() {
-        load();
-    }
-
-    public String getContainer() {
-        return container;
-    }
-
-    @DataBoundSetter
-    public void setContainer(String container) {
-        this.container = container;
-        checkValue(doCheckContainer(container));
-        save();
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    @DataBoundSetter
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-        checkValue(doCheckPrefix(prefix));
-        save();
-    }
-
-    public String getLogGroupName() {
-        return logGroupName;
-    }
-
-    @DataBoundSetter
-    public void setLogGroupName(String logGroupName) {
-        this.logGroupName = logGroupName;
-        checkValue(doCheckLogGroupName(logGroupName));
-        save();
+    public CredentialsAwsGlobalConfiguration() {
+        super();
     }
 
     public String getRegion() {
@@ -276,8 +226,8 @@ public class CloudNativeAwsConfig extends GlobalConfiguration {
     }
 
     @Nonnull
-    public static CloudNativeAwsConfig get() {
-        return ExtensionList.lookupSingleton(CloudNativeAwsConfig.class);
+    public static CredentialsAwsGlobalConfiguration get() {
+        return ExtensionList.lookupSingleton(CredentialsAwsGlobalConfiguration.class);
     }
 
     public ListBoxModel doFillRegionItems() {
@@ -300,18 +250,6 @@ public class CloudNativeAwsConfig extends GlobalConfiguration {
         return credentials;
     }
 
-    public FormValidation doCheckContainer(@QueryParameter String container) {
-        return new S3Config(this).doCheckContainer(container);
-    }
-
-    public FormValidation doCheckPrefix(@QueryParameter String prefix) {
-        return new S3Config(this).doCheckPrefix(container);
-    }
-
-    public FormValidation doCheckLogGroupName(@QueryParameter String logGroup) {
-        return new CloudWatchConfig(this).doCheckLogGroupName(logGroup);
-    }
-
     public FormValidation doCheckRegion(@QueryParameter String region) {
         FormValidation ret = FormValidation.ok();
         if (StringUtils.isNotBlank(region) && Regions.fromName(region) == null) {
@@ -320,24 +258,8 @@ public class CloudNativeAwsConfig extends GlobalConfiguration {
         return ret;
     }
 
-    @RequirePOST
-    public FormValidation doCreateS3Bucket(@QueryParameter String container, @QueryParameter String prefix,
-            @QueryParameter String region, @QueryParameter String credentialsId) {
-        return new S3Config(this).doCreateS3Bucket(container, prefix, region, credentialsId);
+    @Override 
+    public GlobalConfigurationCategory getCategory() {
+        return GlobalConfigurationCategory.get(AwsGlobalConfigurationCategory.class);
     }
-
-    @RequirePOST
-    public FormValidation doValidate(@QueryParameter String container, @QueryParameter String prefix,
-            @QueryParameter String logGroupName, @QueryParameter String region, @QueryParameter String credentialsId)
-            throws IOException {
-        List<FormValidation> validations = new ArrayList<>();
-        validations.add(new S3Config(this).validate(container, prefix, region, credentialsId));
-        validations.add(new CloudWatchConfig(this).validate(logGroupName, region, credentialsId));
-        StringBuffer validationError = new StringBuffer();
-        validations.stream().filter(v -> v.kind != FormValidation.Kind.OK)
-                .forEach(v -> validationError.append(v.getMessage() + ". "));
-        return validationError.length() == 0 ? FormValidation.ok("success")
-                : FormValidation.error(validationError.toString());
-    }
-
 }

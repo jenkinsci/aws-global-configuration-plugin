@@ -24,43 +24,25 @@
 
 package io.jenkins.plugins.cloud_native.aws;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.apache.commons.lang.StringUtils;
+import hudson.Extension;
+import jenkins.model.GlobalConfigurationCategory;
 
 /**
  * @author Carlos Sanchez
  * @since
  *
  */
-public class AbstractAws {
+@Extension
+public class AwsGlobalConfigurationCategory extends GlobalConfigurationCategory {
 
-    private static final Logger LOGGER = Logger.getLogger(AbstractAws.class.getName());
-
-    private AbstractAwsGlobalConfiguration config;
-
-    public AbstractAws(AbstractAwsGlobalConfiguration config) {
-        this.config = config;
+    @Override
+    public String getDisplayName() {
+        return "AWS Configuration";
     }
 
-    protected AbstractAwsGlobalConfiguration getConfig() {
-        return config;
-    }
-
-    /**
-     * it retuns a different cause message based on exception type.
-     * 
-     * @param t
-     *            Throwable to process.
-     * @return the proper cause message.
-     */
-    protected String processExceptionMessage(Throwable t) {
-        LOGGER.log(Level.FINEST, t.getMessage(), t);
-
-        String msg = t.getMessage();
-        String className = t.getClass().getSimpleName();
-        return className + ":" + StringUtils.defaultIfBlank(msg, "Unknown error");
+    @Override
+    public String getShortDescription() {
+        return "AWS Configuration";
     }
 
 }
