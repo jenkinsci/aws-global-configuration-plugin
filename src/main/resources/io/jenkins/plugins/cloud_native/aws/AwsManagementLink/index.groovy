@@ -15,7 +15,7 @@ def st=namespace("jelly:stapler")
 l.layout(norefresh:true, permission:app.ADMINISTER, title:my.displayName, cssclass:request.getParameter('decorate')) {
     l.main_panel {
         h1 {
-            l.icon(class: 'icon-secure icon-xlg')
+            l.icon(src: "${resURL}/plugin/cloud-native-aws/images/aws.png", style: 'width:32px; height:32px')
             text(my.displayName)
         }
 
