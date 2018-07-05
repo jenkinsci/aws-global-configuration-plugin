@@ -45,7 +45,7 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
 
     @Override
     public String getIconFileName() {
-        return "/plugin/cloud-native-aws/images/aws.png";
+        return "/plugin/aws-global-configuration/images/aws.png";
     }
 
     @Override
