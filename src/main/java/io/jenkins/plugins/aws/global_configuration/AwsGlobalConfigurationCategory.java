@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package io.jenkins.plugins.cloud_native.aws;
+package io.jenkins.plugins.aws.global_configuration;
 
 import hudson.Extension;
 import jenkins.model.GlobalConfigurationCategory;

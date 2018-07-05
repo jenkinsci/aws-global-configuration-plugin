@@ -8,7 +8,7 @@
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
-    <artifactId>cloud-native-aws</artifactId>
+    <artifactId>aws-global-configuration</artifactId>
     <version>${revision}${changelist}</version>
     <packaging>hpi</packaging>
     <properties>
@@ -18,7 +18,7 @@
         <java.level>8</java.level>
         <useBeta>true</useBeta>
     </properties>
-    <name>Cloud Native AWS Plugin</name>
+    <name>AWS Global Configuration Plugin</name>
     <description>Configure all AWS related plugins from a single page</description>
     <url>https://wiki.jenkins.io/display/JENKINS/Cloud+Native+AWS+Plugin</url>
     <licenses>

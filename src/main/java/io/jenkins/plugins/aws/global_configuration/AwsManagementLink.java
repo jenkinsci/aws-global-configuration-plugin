@@ -1,4 +1,4 @@
-package io.jenkins.plugins.cloud_native.aws;
+package io.jenkins.plugins.aws.global_configuration;
 
 import com.google.common.base.Predicate;
 import hudson.BulkChange;
