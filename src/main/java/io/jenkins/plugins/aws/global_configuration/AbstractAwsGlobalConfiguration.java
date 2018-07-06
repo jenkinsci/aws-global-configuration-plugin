@@ -24,48 +24,20 @@
 
 package io.jenkins.plugins.aws.global_configuration;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSSessionCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicSessionCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.GetSessionTokenRequest;
-import com.amazonaws.services.securitytoken.model.GetSessionTokenResult;
-import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-import hudson.Extension;
 import hudson.ExtensionList;
-import hudson.model.Failure;
-import hudson.security.ACL;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.GlobalConfigurationCategory;
-import jenkins.model.Jenkins;
 
 public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration {
+
+    private static final Logger LOGGER = Logger.getLogger(AbstractAwsGlobalConfiguration.class.getName());
 
     public AbstractAwsGlobalConfiguration() {
         load();
@@ -80,4 +52,20 @@ public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration
     public GlobalConfigurationCategory getCategory() {
         return GlobalConfigurationCategory.get(AwsGlobalConfigurationCategory.class);
     }
+
+    /**
+     * it returns a different cause message based on exception type.
+     *
+     * @param t
+     *            Throwable to process.
+     * @return the proper cause message.
+     */
+    protected String processExceptionMessage(Throwable t) {
+        LOGGER.log(Level.FINEST, t.getMessage(), t);
+
+        String msg = t.getMessage();
+        String className = t.getClass().getSimpleName();
+        return className + ":" + StringUtils.defaultIfBlank(msg, "Unknown error");
+    }
+
 }
