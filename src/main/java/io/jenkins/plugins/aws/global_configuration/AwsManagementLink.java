@@ -73,8 +73,6 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
     }
 
     public boolean configure(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
-        Jenkins j = Jenkins.getInstance();
-
         boolean result = true;
         for(Descriptor<?> d : Functions.getSortedDescriptorsForGlobalConfig(FILTER)){
             result &= configureDescriptor(req,json,d);
@@ -91,7 +89,7 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
         return d.configure(req, js);
     }
 
-    public static Predicate<GlobalConfigurationCategory> FILTER = new Predicate<GlobalConfigurationCategory>() {
+    public static final Predicate<GlobalConfigurationCategory> FILTER = new Predicate<GlobalConfigurationCategory>() {
         public boolean apply(GlobalConfigurationCategory input) {
             return input instanceof AwsGlobalConfigurationCategory;
         }
