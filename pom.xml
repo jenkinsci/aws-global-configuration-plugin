@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.15</version>
+        <version>3.17</version>
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
@@ -16,7 +16,6 @@
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.121.1</jenkins.version>
         <java.level>8</java.level>
-        <useBeta>true</useBeta>
     </properties>
     <name>AWS Global Configuration Plugin</name>
     <description>Configure all AWS related plugins from a single page</description>
@@ -57,17 +56,4 @@
             <version>1.23</version>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>
-                <artifactId>maven-hpi-plugin</artifactId>
-                <configuration>
-                    <loggers>
-                        <io.jenkins.plugins.pipeline_log_fluentd_cloudwatch>FINE</io.jenkins.plugins.pipeline_log_fluentd_cloudwatch>
-                    </loggers>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
