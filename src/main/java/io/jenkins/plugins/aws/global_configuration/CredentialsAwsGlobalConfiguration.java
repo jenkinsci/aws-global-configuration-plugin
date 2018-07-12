@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -55,6 +54,7 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.ExtensionList;
+import hudson.Util;
 import hudson.model.Failure;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
@@ -90,7 +90,6 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      */
     private String credentialsId;
 
-    @DataBoundConstructor
     public CredentialsAwsGlobalConfiguration() {
         load();
     }
@@ -101,7 +100,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
 
     @DataBoundSetter
     public void setRegion(String region) {
-        this.region = region;
+        this.region = Util.fixEmpty(region);
         checkValue(doCheckRegion(region));
         save();
     }
@@ -231,7 +230,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
         ListBoxModel regions = new ListBoxModel();
         regions.add("Auto", "");
         for (Regions s : Regions.values()) {
-            regions.add(s.getName());
+            regions.add(s.getDescription(), s.getName());
         }
         return regions;
     }
@@ -248,11 +247,14 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
     }
 
     public FormValidation doCheckRegion(@QueryParameter String region) {
-        FormValidation ret = FormValidation.ok();
-        if (StringUtils.isNotBlank(region) && Regions.fromName(region) == null) {
-            ret = FormValidation.error("Region is not valid");
+        if (StringUtils.isNotBlank(region)) {
+            try {
+                Regions.fromName(region);
+            } catch (IllegalArgumentException x) {
+                return FormValidation.error("Region is not valid");
+            }
         }
-        return ret;
+        return FormValidation.ok();
     }
 
 }
