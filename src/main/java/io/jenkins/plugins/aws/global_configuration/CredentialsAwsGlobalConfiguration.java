@@ -27,11 +27,9 @@ package io.jenkins.plugins.aws.global_configuration;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
-import hudson.model.Descriptor;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -61,7 +59,6 @@ import hudson.model.Failure;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import jenkins.model.GlobalConfigurationCategory;
 import jenkins.model.Jenkins;
 
 /**
@@ -69,8 +66,6 @@ import jenkins.model.Jenkins;
  */
 @Extension @Symbol("credentials")
 public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
-
-    private static final Logger LOGGER = Logger.getLogger(CredentialsAwsGlobalConfiguration.class.getName());
 
     /**
      * field to fake endpoint on test.
@@ -97,7 +92,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
 
     @DataBoundConstructor
     public CredentialsAwsGlobalConfiguration() {
-        super();
+        load();
     }
 
     public String getRegion() {
@@ -260,8 +255,4 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
         return ret;
     }
 
-    @Override 
-    public GlobalConfigurationCategory getCategory() {
-        return GlobalConfigurationCategory.get(AwsGlobalConfigurationCategory.class);
-    }
 }

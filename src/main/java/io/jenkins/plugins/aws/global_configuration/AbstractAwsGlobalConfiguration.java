@@ -27,11 +27,9 @@ package io.jenkins.plugins.aws.global_configuration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.StringUtils;
 
-import hudson.ExtensionList;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.GlobalConfigurationCategory;
 
@@ -41,11 +39,6 @@ public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration
 
     public AbstractAwsGlobalConfiguration() {
         load();
-    }
-
-    @Nonnull
-    public static AbstractAwsGlobalConfiguration get() {
-        return ExtensionList.lookupSingleton(AbstractAwsGlobalConfiguration.class);
     }
 
     @Override 
