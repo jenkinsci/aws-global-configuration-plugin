@@ -26,12 +26,14 @@ package io.jenkins.plugins.aws.global_configuration;
 
 import hudson.Extension;
 import jenkins.model.GlobalConfigurationCategory;
+import org.jenkinsci.Symbol;
 
 /**
  * @author Carlos Sanchez
  * @since
  *
  */
+@Symbol("aws")
 @Extension
 public class AwsGlobalConfigurationCategory extends GlobalConfigurationCategory {
 

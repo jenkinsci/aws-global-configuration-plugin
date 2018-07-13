@@ -64,7 +64,8 @@ import jenkins.model.Jenkins;
 /**
  * Store the AWS configuration to save it on a separate file
  */
-@Extension @Symbol("credentials")
+@Symbol("awsCredentials")
+@Extension
 public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
 
     /**
