@@ -68,11 +68,6 @@ import jenkins.model.Jenkins;
 public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
 
     /**
-     * field to fake endpoint on test.
-     */
-    static AwsClientBuilder.EndpointConfiguration ENDPOINT;
-
-    /**
      * Session token duration in seconds.
      */
     @SuppressWarnings("FieldMayBeFinal")
@@ -196,9 +191,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      */
     public AWSSessionCredentials sessionCredentials(AwsClientBuilder<?, ?> builder) throws IOException {
         AWSSessionCredentials awsCredentials;
-        if (ENDPOINT != null) {
-            awsCredentials = new BasicSessionCredentials("FakeKey", "FakeSecret", "FakeToken");
-        } else if (hasCredentialsConfigured()) {
+        if (hasCredentialsConfigured()) {
             awsCredentials = sessionCredentialsFromKeyAndSecret();
         } else {
             awsCredentials = sessionCredentialsFromInstanceProfile(builder);
