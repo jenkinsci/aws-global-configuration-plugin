@@ -37,9 +37,7 @@ public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration
 
     private static final Logger LOGGER = Logger.getLogger(AbstractAwsGlobalConfiguration.class.getName());
 
-    public AbstractAwsGlobalConfiguration() {
-        load();
-    }
+    protected AbstractAwsGlobalConfiguration() {}
 
     @Override 
     public GlobalConfigurationCategory getCategory() {
