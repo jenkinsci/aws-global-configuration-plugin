@@ -166,9 +166,13 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      * @throws IOException
      *             in case ot error.
      */
-    private AWSSessionCredentials sessionCredentialsFromInstanceProfile(AwsClientBuilder<?, ?> builder)
+    private AWSSessionCredentials sessionCredentialsFromInstanceProfile(@Nonnull AwsClientBuilder<?, ?> builder)
             throws IOException {
-        AWSCredentials awsCredentials = builder.getCredentials().getCredentials();
+        AWSCredentialsProvider credentialsProvider = builder.getCredentials();
+        if (credentialsProvider == null) {
+            throw new IOException("This client builder has no associated credentials");
+        }
+        AWSCredentials awsCredentials = credentialsProvider.getCredentials();
 
         if (awsCredentials == null) {
             throw new IOException("Unable to get credentials from environment");
@@ -189,7 +193,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      * @throws IOException
      *             in case of error.
      */
-    public AWSSessionCredentials sessionCredentials(AwsClientBuilder<?, ?> builder) throws IOException {
+    public AWSSessionCredentials sessionCredentials(@Nonnull AwsClientBuilder<?, ?> builder) throws IOException {
         AWSSessionCredentials awsCredentials;
         if (hasCredentialsConfigured()) {
             awsCredentials = sessionCredentialsFromKeyAndSecret();
