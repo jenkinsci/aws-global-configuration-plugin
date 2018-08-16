@@ -24,15 +24,22 @@
 
 package io.jenkins.plugins.aws.global_configuration;
 
-import com.amazonaws.regions.Regions;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlSelect;
-import hudson.util.FormValidation;
-import org.junit.Test;
 import static org.junit.Assert.*;
+
 import org.junit.Rule;
+import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
+
+import com.amazonaws.regions.Regions;
+import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsImpl;
+import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlSelect;
+
+import hudson.util.FormValidation;
 
 public class CredentialsAwsGlobalConfigurationTest {
 
@@ -68,4 +75,17 @@ public class CredentialsAwsGlobalConfigurationTest {
         });
     }
 
+    @Test
+    public void credentials() {
+        rr.then(r -> {
+            AmazonWebServicesCredentials credentials = new AWSCredentialsImpl(CredentialsScope.GLOBAL,
+                    "CredentialsAwsGlobalConfigurationTest", "xxx", "secret", "test credentials");
+            SystemCredentialsProvider.getInstance().getCredentials().add(credentials);
+            CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
+            descriptor.setCredentialsId("CredentialsAwsGlobalConfigurationTest");
+            assertEquals(credentials, descriptor.getCredentials());
+            descriptor.setCredentialsId("");
+            assertNull(descriptor.getCredentials());
+        });
+    }
 }

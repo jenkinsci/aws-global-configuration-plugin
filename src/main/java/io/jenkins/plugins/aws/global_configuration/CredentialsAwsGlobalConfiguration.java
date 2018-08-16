@@ -32,6 +32,8 @@ import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.interceptor.RequirePOST;
@@ -45,6 +47,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
+import com.amazonaws.services.securitytoken.model.Credentials;
 import com.amazonaws.services.securitytoken.model.GetSessionTokenRequest;
 import com.amazonaws.services.securitytoken.model.GetSessionTokenResult;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
@@ -90,6 +93,13 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
         load();
     }
 
+    /**
+     * Testing only
+     */
+    @Restricted(NoExternalUse.class)
+    protected CredentialsAwsGlobalConfiguration(boolean test) {
+    }
+
     public String getRegion() {
         return region;
     }
@@ -112,6 +122,10 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
     }
 
     public AmazonWebServicesCredentials getCredentials() {
+        return getCredentials(credentialsId);
+    }
+
+    public AmazonWebServicesCredentials getCredentials(String credentialsId) {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         Optional<AmazonWebServicesCredentials> credential = CredentialsProvider
                 .lookupCredentials(AmazonWebServicesCredentials.class, Jenkins.get(), ACL.SYSTEM,
@@ -128,8 +142,8 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      *
      * @return true if an AWS credential is configured and the AWS credential exists.
      */
-    private boolean hasCredentialsConfigured() {
-        return StringUtils.isNotBlank(getCredentialsId()) && getCredentials() != null;
+    private boolean hasCredentialsConfigured(String credentialsId) {
+        return StringUtils.isNotBlank(credentialsId) && getCredentials(credentialsId) != null;
     }
 
     /**
@@ -137,8 +151,8 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      * 
      * @return the AWS session credential result of the request to the AWS token service.
      */
-    private AWSSessionCredentials sessionCredentialsFromKeyAndSecret() {
-        AmazonWebServicesCredentials jenkinsAwsCredentials = getCredentials();
+    private AWSSessionCredentials sessionCredentialsFromKeyAndSecret(String region, String credentialsId) {
+        AmazonWebServicesCredentials jenkinsAwsCredentials = getCredentials(credentialsId);
         AWSCredentials awsCredentials = jenkinsAwsCredentials.getCredentials();
 
         if (awsCredentials instanceof AWSSessionCredentials) {
@@ -146,17 +160,25 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
         }
 
         AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
+        com.amazonaws.services.securitytoken.model.Credentials credentials = getSessionCredentials(credentialsProvider,
+                region);
+
+        return new BasicSessionCredentials(credentials.getAccessKeyId(), credentials.getSecretAccessKey(),
+                credentials.getSessionToken());
+    }
+
+    private Credentials getSessionCredentials(AWSCredentialsProvider credentialsProvider, String region) {
         AWSSecurityTokenServiceClientBuilder tokenSvcBuilder = AWSSecurityTokenServiceClientBuilder.standard()
-                .withRegion(getRegion()).withCredentials(credentialsProvider);
+                .withCredentials(credentialsProvider);
+        if (region != null) {
+            tokenSvcBuilder.withRegion(region);
+        }
         AWSSecurityTokenService tokenSvc = tokenSvcBuilder.build();
 
         GetSessionTokenRequest sessionTokenRequest = new GetSessionTokenRequest()
                 .withDurationSeconds(getSessionDuration());
         GetSessionTokenResult sessionToken = tokenSvc.getSessionToken(sessionTokenRequest);
-        com.amazonaws.services.securitytoken.model.Credentials credentials = sessionToken.getCredentials();
-
-        return new BasicSessionCredentials(credentials.getAccessKeyId(), credentials.getSecretAccessKey(),
-                credentials.getSessionToken());
+        return sessionToken.getCredentials();
     }
 
     /**
@@ -186,17 +208,26 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
     }
 
     /**
+     * Use {@link #sessionCredentials(AwsClientBuilder, String, String)}
+     */
+    @Deprecated
+    public AWSSessionCredentials sessionCredentials(@Nonnull AwsClientBuilder<?, ?> builder) throws IOException {
+        return sessionCredentials(builder, this.getRegion(), this.getCredentialsId());
+    }
+
+    /**
      * Select the type of AWS credential that has to be created based on the configuration. If no AWS credential is
      * provided, the IAM instance profile or user AWS configuration is used to create the AWS credentials.
      * 
-     * @return A n AWS session credential.
+     * @return An AWS session credential.
      * @throws IOException
      *             in case of error.
      */
-    public AWSSessionCredentials sessionCredentials(@Nonnull AwsClientBuilder<?, ?> builder) throws IOException {
+    public AWSSessionCredentials sessionCredentials(@Nonnull AwsClientBuilder<?, ?> builder, String region,
+            String credentialsId) throws IOException {
         AWSSessionCredentials awsCredentials;
-        if (hasCredentialsConfigured()) {
-            awsCredentials = sessionCredentialsFromKeyAndSecret();
+        if (hasCredentialsConfigured(credentialsId)) {
+            awsCredentials = sessionCredentialsFromKeyAndSecret(region, credentialsId);
         } else {
             awsCredentials = sessionCredentialsFromInstanceProfile(builder);
         }
