@@ -207,6 +207,9 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
         return (AWSSessionCredentials) awsCredentials;
     }
 
+    /**
+     * Use {@link #sessionCredentials(AwsClientBuilder, String, String)}
+     */
     @Deprecated
     public AWSSessionCredentials sessionCredentials(@Nonnull AwsClientBuilder<?, ?> builder) throws IOException {
         return sessionCredentials(builder, this.getRegion(), this.getCredentialsId());
