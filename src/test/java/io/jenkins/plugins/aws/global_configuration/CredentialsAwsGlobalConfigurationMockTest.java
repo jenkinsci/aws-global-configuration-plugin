@@ -153,7 +153,7 @@ public class CredentialsAwsGlobalConfigurationMockTest {
         verify(tokenServiceBuilder).withRegion(REGION);
     }
 
-    @Ignore("TODO the call proceeds normally for me; what is this supposedly testing?")
+    @Ignore("This relies on not having AWS credentials configured")
     @Test
     public void testSessionCredentialsFromEnvironment() throws Exception {
         // no easy way to test session credentials without an environment
