@@ -55,6 +55,7 @@ import com.amazonaws.services.securitytoken.model.GetSessionTokenResult;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 
 import jenkins.model.Jenkins;
+import org.junit.Ignore;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ CredentialsAwsGlobalConfiguration.class, Jenkins.class, AWSSecurityTokenServiceClientBuilder.class })
@@ -152,6 +153,7 @@ public class CredentialsAwsGlobalConfigurationMockTest {
         verify(tokenServiceBuilder).withRegion(REGION);
     }
 
+    @Ignore("This relies on not having AWS credentials configured")
     @Test
     public void testSessionCredentialsFromEnvironment() throws Exception {
         // no easy way to test session credentials without an environment
