@@ -126,7 +126,6 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
     }
 
     public AmazonWebServicesCredentials getCredentials(String credentialsId) {
-        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         Optional<AmazonWebServicesCredentials> credential = CredentialsProvider
                 .lookupCredentials(AmazonWebServicesCredentials.class, Jenkins.get(), ACL.SYSTEM,
                         Collections.emptyList())
