@@ -60,7 +60,7 @@ import org.junit.Ignore;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ CredentialsAwsGlobalConfiguration.class, Jenkins.class, AWSSecurityTokenServiceClientBuilder.class })
 @PowerMockIgnore({ "javax.management.*", "org.apache.http.conn.ssl.*", "com.amazonaws.http.conn.ssl.*",
-        "javax.net.ssl.*" })
+        "javax.net.ssl.*", "javax.xml.*" })
 public class CredentialsAwsGlobalConfigurationMockTest {
 
     private static String CREDENTIALS_ID = "CredentialsAwsGlobalConfigurationMockTest";
