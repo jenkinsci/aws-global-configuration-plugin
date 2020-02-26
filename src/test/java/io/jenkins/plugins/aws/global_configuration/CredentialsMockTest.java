@@ -58,12 +58,12 @@ import jenkins.model.Jenkins;
 import org.junit.Ignore;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ CredentialsAwsGlobalConfiguration.class, Jenkins.class, AWSSecurityTokenServiceClientBuilder.class })
+@PrepareForTest({ Credentials.class, Jenkins.class, AWSSecurityTokenServiceClientBuilder.class })
 @PowerMockIgnore({ "javax.management.*", "org.apache.http.conn.ssl.*", "com.amazonaws.http.conn.ssl.*",
         "javax.net.ssl.*", "javax.xml.*" })
-public class CredentialsAwsGlobalConfigurationMockTest {
+public class CredentialsMockTest {
 
-    private static String CREDENTIALS_ID = "CredentialsAwsGlobalConfigurationMockTest";
+    private static String CREDENTIALS_ID = "CredentialsMockTest";
     private static String REGION = "us-east-1";
 
     @Rule
@@ -73,7 +73,7 @@ public class CredentialsAwsGlobalConfigurationMockTest {
     private Jenkins jenkins;
 
     @Spy
-    private CredentialsAwsGlobalConfiguration config = new CredentialsAwsGlobalConfiguration(true);
+    private Credentials config = new Credentials(true);
 
     @Mock
     private AmazonWebServicesCredentials jenkinsCredentials;
@@ -86,8 +86,8 @@ public class CredentialsAwsGlobalConfigurationMockTest {
 
     @Before
     public void before() throws Exception {
-        PowerMockito.mockStatic(CredentialsAwsGlobalConfiguration.class);
-        when(CredentialsAwsGlobalConfiguration.get()).thenReturn(config);
+        PowerMockito.mockStatic(Credentials.class);
+        when(Credentials.get()).thenReturn(config);
         PowerMockito.mockStatic(Jenkins.class);
         when(Jenkins.get()).thenReturn(jenkins);
         doReturn(jenkinsCredentials).when(config).getCredentials(CREDENTIALS_ID);
