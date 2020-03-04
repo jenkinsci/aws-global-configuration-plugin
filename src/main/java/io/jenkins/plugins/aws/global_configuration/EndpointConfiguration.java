@@ -2,6 +2,11 @@ package io.jenkins.plugins.aws.global_configuration;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.secretsmanager.AWSSecretsManager;
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClient;
+import com.amazonaws.services.secretsmanager.model.ListSecretsRequest;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.ExtensionList;
@@ -97,13 +102,23 @@ public class EndpointConfiguration extends AbstractAwsGlobalConfiguration
             @QueryParameter("signingRegion") final String signingRegion) {
         Jenkins.getInstance().checkPermission(Jenkins.ADMINISTER);
 
-//        final AwsClientBuilder.EndpointConfiguration ec =
-//                new AwsClientBuilder.EndpointConfiguration(serviceEndpoint, signingRegion);
+        final String r;
+        if (signingRegion == null || signingRegion.isEmpty()) {
+            r = getCurrentRegionOrDefault();
+        } else {
+            r = signingRegion;
+        }
+        final AwsClientBuilder.EndpointConfiguration ec =
+               new AwsClientBuilder.EndpointConfiguration(serviceEndpoint, r);
+        // FIXME use a service-independent API call
+        final AWSSecretsManager client =
+                AWSSecretsManagerClient.builder().withEndpointConfiguration(ec).build();
 
         final int statusCode;
         try {
-            // TODO implement a real test with AWS SDK
-            statusCode = 200;
+            statusCode = client.listSecrets(new ListSecretsRequest())
+                    .getSdkHttpMetadata()
+                    .getHttpStatusCode();
         } catch (AmazonClientException ex) {
             final String msg = Messages.awsClientError() + ": '" + ex.getMessage() + "'";
             return FormValidation.error(msg);
@@ -114,5 +129,15 @@ public class EndpointConfiguration extends AbstractAwsGlobalConfiguration
         } else {
             return FormValidation.error(Messages.awsServerError() + ": HTTP " + statusCode);
         }
+    }
+
+    private static String getCurrentRegionOrDefault() {
+        final Region currentRegion = Regions.getCurrentRegion();
+
+        if (currentRegion != null) {
+            return currentRegion.getName();
+        }
+
+        return Regions.DEFAULT_REGION.getName();
     }
 }
