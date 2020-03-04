@@ -8,3 +8,5 @@ work
 .stignore
 .vscode/
 protojep.adoc
+.idea
+*.iml

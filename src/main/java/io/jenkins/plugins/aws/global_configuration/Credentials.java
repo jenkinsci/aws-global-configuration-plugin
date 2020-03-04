@@ -44,10 +44,8 @@ import com.amazonaws.auth.AWSSessionCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.Credentials;
 import com.amazonaws.services.securitytoken.model.GetSessionTokenRequest;
 import com.amazonaws.services.securitytoken.model.GetSessionTokenResult;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
@@ -69,27 +67,27 @@ import jenkins.model.Jenkins;
  */
 @Symbol("awsCredentials")
 @Extension
-public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
+public class Credentials extends AbstractAwsGlobalConfiguration {
 
     /**
      * Session token duration in seconds.
      */
     @SuppressWarnings("FieldMayBeFinal")
-    private static int SESSION_DURATION = Integer.getInteger(CredentialsAwsGlobalConfiguration.class.getName() + ".sessionDuration",
+    private static int SESSION_DURATION = Integer.getInteger(Credentials.class.getName() + ".sessionDuration",
             3600);
 
     /**
-     * force the region to use for the presigned S3 URLs generated.
+     * override the region to use for authentication.
      */
     private String region;
 
     /**
-     * AWS credentials to access to the S3 Bucket, if it is empty, it would use the IAM instance profile from the
+     * AWS credentials to access the account, if it is empty, it would use the IAM instance profile from the
      * jenkins hosts.
      */
     private String credentialsId;
 
-    public CredentialsAwsGlobalConfiguration() {
+    public Credentials() {
         load();
     }
 
@@ -97,7 +95,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      * Testing only
      */
     @Restricted(NoExternalUse.class)
-    protected CredentialsAwsGlobalConfiguration(boolean test) {
+    protected Credentials(boolean test) {
     }
 
     public String getRegion() {
@@ -166,7 +164,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
                 credentials.getSessionToken());
     }
 
-    private Credentials getSessionCredentials(AWSCredentialsProvider credentialsProvider, String region) {
+    private com.amazonaws.services.securitytoken.model.Credentials getSessionCredentials(AWSCredentialsProvider credentialsProvider, String region) {
         AWSSecurityTokenServiceClientBuilder tokenSvcBuilder = AWSSecurityTokenServiceClientBuilder.standard()
                 .withCredentials(credentialsProvider);
         if (region != null) {
@@ -246,21 +244,16 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
     @Nonnull
     @Override
     public String getDisplayName() {
-        return "Amazon S3 Bucket Access settings";
+        return "Amazon Credentials";
     }
 
     @Nonnull
-    public static CredentialsAwsGlobalConfiguration get() {
-        return ExtensionList.lookupSingleton(CredentialsAwsGlobalConfiguration.class);
+    public static Credentials get() {
+        return ExtensionList.lookupSingleton(Credentials.class);
     }
 
     public ListBoxModel doFillRegionItems() {
-        ListBoxModel regions = new ListBoxModel();
-        regions.add("Auto", "");
-        for (Regions s : Regions.values()) {
-            regions.add(s.getDescription(), s.getName());
-        }
-        return regions;
+        return RegionUtils.fillRegionItems();
     }
 
     @RequirePOST
@@ -275,14 +268,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
     }
 
     public FormValidation doCheckRegion(@QueryParameter String region) {
-        if (StringUtils.isNotBlank(region)) {
-            try {
-                Regions.fromName(region);
-            } catch (IllegalArgumentException x) {
-                return FormValidation.error("Region is not valid");
-            }
-        }
-        return FormValidation.ok();
+        return RegionUtils.checkRegion(region);
     }
 
 }

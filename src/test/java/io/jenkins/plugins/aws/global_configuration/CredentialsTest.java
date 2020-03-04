@@ -41,7 +41,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSelect;
 
 import hudson.util.FormValidation;
 
-public class CredentialsAwsGlobalConfigurationTest {
+public class CredentialsTest {
 
     @Rule
     public RestartableJenkinsRule rr = new RestartableJenkinsRule();
@@ -49,7 +49,7 @@ public class CredentialsAwsGlobalConfigurationTest {
     @Test
     public void doCheckRegion() {
         rr.then(r -> {
-            CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
+            Credentials descriptor = Credentials.get();
             assertEquals(descriptor.doCheckRegion("").kind, FormValidation.Kind.OK);
             assertEquals(descriptor.doCheckRegion("us-west-1").kind, FormValidation.Kind.OK);
             assertEquals(descriptor.doCheckRegion("no-valid").kind, FormValidation.Kind.ERROR);
@@ -59,19 +59,19 @@ public class CredentialsAwsGlobalConfigurationTest {
     @Test
     public void uiAndStorage() {
         rr.then(r -> {
-            assertNull("not set initially", CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertNull("not set initially", Credentials.get().getRegion());
             JenkinsRule.WebClient wc = r.createWebClient();
             HtmlForm config = wc.goTo("aws").getFormByName("config");
             r.submit(config);
-            assertNull("round-trips to null", CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertNull("round-trips to null", Credentials.get().getRegion());
             config = wc.goTo("aws").getFormByName("config");
             HtmlSelect select = config.getSelectByName("_.region");
             select.setSelectedAttribute(Regions.SA_EAST_1.getName(), true);
             r.submit(config);
-            assertEquals("global config page let us edit it", Regions.SA_EAST_1.getName(), CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertEquals("global config page let us edit it", Regions.SA_EAST_1.getName(), Credentials.get().getRegion());
         });
         rr.then(r -> {
-            assertEquals("still there after restart of Jenkins", Regions.SA_EAST_1.getName(), CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertEquals("still there after restart of Jenkins", Regions.SA_EAST_1.getName(), Credentials.get().getRegion());
         });
     }
 
@@ -79,10 +79,10 @@ public class CredentialsAwsGlobalConfigurationTest {
     public void credentials() {
         rr.then(r -> {
             AmazonWebServicesCredentials credentials = new AWSCredentialsImpl(CredentialsScope.GLOBAL,
-                    "CredentialsAwsGlobalConfigurationTest", "xxx", "secret", "test credentials");
+                    "CredentialsTest", "xxx", "secret", "test credentials");
             SystemCredentialsProvider.getInstance().getCredentials().add(credentials);
-            CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
-            descriptor.setCredentialsId("CredentialsAwsGlobalConfigurationTest");
+            Credentials descriptor = Credentials.get();
+            descriptor.setCredentialsId("CredentialsTest");
             assertEquals(credentials, descriptor.getCredentials());
             descriptor.setCredentialsId("");
             assertNull(descriptor.getCredentials());
