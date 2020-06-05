@@ -9,7 +9,7 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>aws-global-configuration</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>1.4</version>
     <packaging>hpi</packaging>
     <properties>
         <revision>1.4</revision>
@@ -30,7 +30,7 @@
         <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
-        <tag>${scmTag}</tag>
+        <tag>aws-global-configuration-1.4</tag>
     </scm>
     <repositories>
         <repository>
