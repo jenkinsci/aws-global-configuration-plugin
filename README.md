@@ -1,7 +1,11 @@
 # Jenkins AWS Global Configuration Plugin
 
-Common configuration for the AWS plugins.
+Common configuration for the Amazon Web Services plugins.
 
-Allows setting AWS credentials and configuration from a common page that can be reused for other plugins.
+Allows setting AWS credentials and configuration from a common configuration page that can be reused for other plugins.
 
-[Wiki](https://wiki.jenkins.io/display/JENKINS/AWS+Global+Configuration+Plugin)
+## Changelog
+
+For new versions, see [GitHub releases](https://github.com/jenkinsci/aws-global-configuration-plugin/releases).
+
+For old versions, see the [old changelog](old-changes.md).

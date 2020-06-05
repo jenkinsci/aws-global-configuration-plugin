@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: aws-global-configuration-$NEXT_MINOR_VERSION
