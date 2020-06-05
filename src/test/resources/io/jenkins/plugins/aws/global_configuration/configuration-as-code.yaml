@@ -1,0 +1,13 @@
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - aws:
+              accessKey: "accesskeyid"
+              id: "aws"
+              scope: GLOBAL
+              secretKey: "{AQAAABAAAAAQJnQ9GR8O0LN5UdC9/CzXTC8+ZCbmAvzCu76egvlgyUY=}"
+aws:
+  awsCredentials:
+    credentialsId: "aws"
+    region: "us-east-1"
