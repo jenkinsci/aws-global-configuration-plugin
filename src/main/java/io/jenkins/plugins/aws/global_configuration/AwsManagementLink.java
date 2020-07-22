@@ -78,7 +78,7 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
     public boolean configure(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
         boolean result = true;
         for(Descriptor<?> d : Functions.getSortedDescriptorsForGlobalConfigByDescriptor(descriptor ->
-                descriptor.getCategory() instanceof AwsGlobalConfigurationCategory)){
+                FILTER.apply(descriptor.getCategory()))){
             result &= configureDescriptor(req,json,d);
         }
 
