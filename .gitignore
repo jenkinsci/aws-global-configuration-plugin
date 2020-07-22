@@ -8,3 +8,5 @@ work
 .stignore
 .vscode/
 protojep.adoc
+.idea/
+aws-global-configuration.iml

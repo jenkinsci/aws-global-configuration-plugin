@@ -54,6 +54,9 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
     }
 
     @Override
+    public Category getCategory() { return Category.CONFIGURATION; }
+
+    @Override
     public Descriptor<AwsManagementLink> getDescriptor() {
         return Jenkins.get().getDescriptorOrDie(AwsManagementLink.class);
     }
@@ -61,11 +64,11 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
     @RequirePOST
     public synchronized void doConfigure(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, Descriptor.FormException {
         // for compatibility reasons, the actual value is stored in Jenkins
-        BulkChange bc = new BulkChange(Jenkins.getInstance());
+        BulkChange bc = new BulkChange(Jenkins.get());
         try{
             boolean result = configure(req, req.getSubmittedForm());
             LOGGER.log(Level.FINE, "security saved: "+result);
-            Jenkins.getInstance().save();
+            Jenkins.get().save();
             FormApply.success(req.getContextPath()+"/manage").generateResponse(req, rsp, null);
         } finally {
             bc.commit();
@@ -74,7 +77,8 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
 
     public boolean configure(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
         boolean result = true;
-        for(Descriptor<?> d : Functions.getSortedDescriptorsForGlobalConfig(FILTER)){
+        for(Descriptor<?> d : Functions.getSortedDescriptorsForGlobalConfigByDescriptor(descriptor ->
+                FILTER.apply(descriptor.getCategory()))){
             result &= configureDescriptor(req,json,d);
         }
 
