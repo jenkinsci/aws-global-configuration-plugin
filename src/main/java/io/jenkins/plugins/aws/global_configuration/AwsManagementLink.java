@@ -14,7 +14,7 @@ import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.interceptor.RequirePOST;
+import org.kohsuke.stapler.verb.POST;
 
 import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
@@ -58,8 +58,9 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
         return Jenkins.get().getDescriptorOrDie(AwsManagementLink.class);
     }
 
-    @RequirePOST
+    @POST
     public synchronized void doConfigure(StaplerRequest req, StaplerResponse rsp) throws IOException, ServletException, Descriptor.FormException {
+        Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         // for compatibility reasons, the actual value is stored in Jenkins
         BulkChange bc = new BulkChange(Jenkins.getInstance());
         try{
