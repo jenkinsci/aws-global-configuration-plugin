@@ -56,7 +56,7 @@ public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration
 
         String msg = t.getMessage();
         String className = t.getClass().getSimpleName();
-        return className + ":" + StringUtils.defaultIfBlank(msg, "Unknown error");
+        return className + ": " + StringUtils.defaultIfBlank(msg, "Unknown error");
     }
 
 }
