@@ -1,6 +1,7 @@
 package io.jenkins.plugins.aws.global_configuration;
 
 import com.google.common.base.Predicate;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.BulkChange;
 import hudson.Extension;
 import hudson.Functions;
@@ -16,7 +17,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.verb.POST;
 
-import javax.annotation.CheckForNull;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.logging.Level;
