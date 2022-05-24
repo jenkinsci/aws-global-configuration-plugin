@@ -9,11 +9,10 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>aws-global-configuration</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>${changelist}</version>
     <packaging>hpi</packaging>
     <properties>
-        <revision>1.8</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>999999-SNAPSHOT</changelist>
         <jenkins.version>2.303.1</jenkins.version>
     </properties>
     <name>AWS Global Configuration Plugin</name>
