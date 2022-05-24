@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -187,7 +187,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      * @throws IOException
      *             in case ot error.
      */
-    private AWSSessionCredentials sessionCredentialsFromInstanceProfile(@Nonnull AwsClientBuilder<?, ?> builder)
+    private AWSSessionCredentials sessionCredentialsFromInstanceProfile(@NonNull AwsClientBuilder<?, ?> builder)
             throws IOException {
         AWSCredentialsProvider credentialsProvider = builder.getCredentials();
         if (credentialsProvider == null) {
@@ -210,7 +210,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      * Use {@link #sessionCredentials(AwsClientBuilder, String, String)}
      */
     @Deprecated
-    public AWSSessionCredentials sessionCredentials(@Nonnull AwsClientBuilder<?, ?> builder) throws IOException {
+    public AWSSessionCredentials sessionCredentials(@NonNull AwsClientBuilder<?, ?> builder) throws IOException {
         return sessionCredentials(builder, this.getRegion(), this.getCredentialsId());
     }
 
@@ -222,7 +222,7 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
      * @throws IOException
      *             in case of error.
      */
-    public AWSSessionCredentials sessionCredentials(@Nonnull AwsClientBuilder<?, ?> builder, String region,
+    public AWSSessionCredentials sessionCredentials(@NonNull AwsClientBuilder<?, ?> builder, String region,
             String credentialsId) throws IOException {
         AWSSessionCredentials awsCredentials;
         if (hasCredentialsConfigured(credentialsId)) {
@@ -243,13 +243,13 @@ public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfigur
         return SESSION_DURATION;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public String getDisplayName() {
         return "Amazon S3 Bucket Access settings";
     }
 
-    @Nonnull
+    @NonNull
     public static CredentialsAwsGlobalConfiguration get() {
         return ExtensionList.lookupSingleton(CredentialsAwsGlobalConfiguration.class);
     }
