@@ -14,6 +14,8 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <jenkins.version>2.303.1</jenkins.version>
+        <spotbugs.effort>Max</spotbugs.effort>
+        <spotbugs.threshold>Low</spotbugs.threshold>
     </properties>
     <name>AWS Global Configuration Plugin</name>
     <description>Configure all AWS related plugins from a single page</description>
