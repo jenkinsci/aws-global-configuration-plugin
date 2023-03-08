@@ -69,7 +69,7 @@ import jenkins.model.Jenkins;
  */
 @Symbol("awsCredentials")
 @Extension
-public class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
+public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalConfiguration {
 
     /**
      * Session token duration in seconds.

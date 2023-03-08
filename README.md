@@ -8,4 +8,4 @@ Allows setting AWS credentials and configuration from a common configuration pag
 
 For new versions, see [GitHub releases](https://github.com/jenkinsci/aws-global-configuration-plugin/releases).
 
-For old versions, see the [old changelog](old-changes.md).
+For old versions, see the [old changelog](https://github.com/jenkinsci/aws-global-configuration-plugin/blob/dffad511c7c223d62678a0ade9395cc372f88dc0/old-changes.md).
