@@ -53,6 +53,7 @@ import com.amazonaws.services.securitytoken.model.GetSessionTokenResult;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
@@ -111,21 +112,24 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
         save();
     }
 
+    @CheckForNull
     public String getCredentialsId() {
         return credentialsId;
     }
 
     @DataBoundSetter
-    public void setCredentialsId(String credentialsId) {
+    public void setCredentialsId(@CheckForNull String credentialsId) {
         this.credentialsId = StringUtils.defaultIfBlank(credentialsId, null);
         save();
     }
 
+    @CheckForNull
     public AmazonWebServicesCredentials getCredentials() {
-        return getCredentials(credentialsId);
+        return credentialsId != null ? getCredentials(credentialsId) : null;
     }
 
-    public AmazonWebServicesCredentials getCredentials(String credentialsId) {
+    @CheckForNull
+    public AmazonWebServicesCredentials getCredentials(@NonNull String credentialsId) {
         Optional<AmazonWebServicesCredentials> credential = CredentialsProvider
                 .lookupCredentials(AmazonWebServicesCredentials.class, Jenkins.get(), ACL.SYSTEM,
                         Collections.emptyList())
@@ -138,20 +142,11 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
     }
 
     /**
-     *
-     * @return true if an AWS credential is configured and the AWS credential exists.
-     */
-    private boolean hasCredentialsConfigured(String credentialsId) {
-        return StringUtils.isNotBlank(credentialsId) && getCredentials(credentialsId) != null;
-    }
-
-    /**
      * create a AWS session credentials from a Key and a Secret configured in a AWS credential in Jenkins.
      * 
      * @return the AWS session credential result of the request to the AWS token service.
      */
-    private AWSSessionCredentials sessionCredentialsFromKeyAndSecret(String region, String credentialsId) {
-        AmazonWebServicesCredentials jenkinsAwsCredentials = getCredentials(credentialsId);
+    private AWSSessionCredentials sessionCredentialsFromKeyAndSecret(String region, @NonNull AmazonWebServicesCredentials jenkinsAwsCredentials) {
         AWSCredentials awsCredentials = jenkinsAwsCredentials.getCredentials();
 
         if (awsCredentials instanceof AWSSessionCredentials) {
@@ -224,13 +219,12 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      */
     public AWSSessionCredentials sessionCredentials(@NonNull AwsClientBuilder<?, ?> builder, String region,
             String credentialsId) throws IOException {
-        AWSSessionCredentials awsCredentials;
-        if (hasCredentialsConfigured(credentialsId)) {
-            awsCredentials = sessionCredentialsFromKeyAndSecret(region, credentialsId);
+        AmazonWebServicesCredentials baseCredentials = StringUtils.isNotBlank(credentialsId) ? getCredentials(credentialsId) : null;
+        if (baseCredentials != null) {
+            return sessionCredentialsFromKeyAndSecret(region, baseCredentials);
         } else {
-            awsCredentials = sessionCredentialsFromInstanceProfile(builder);
+            return sessionCredentialsFromInstanceProfile(builder);
         }
-        return awsCredentials;
     }
 
     private void checkValue(@NonNull FormValidation formValidation) {
