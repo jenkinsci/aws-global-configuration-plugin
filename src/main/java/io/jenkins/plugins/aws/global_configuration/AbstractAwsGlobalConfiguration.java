@@ -26,12 +26,9 @@ package io.jenkins.plugins.aws.global_configuration;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-
-import org.apache.commons.lang.StringUtils;
-
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.GlobalConfigurationCategory;
+import org.apache.commons.lang.StringUtils;
 
 public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration {
 
@@ -39,7 +36,7 @@ public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration
 
     protected AbstractAwsGlobalConfiguration() {}
 
-    @Override 
+    @Override
     public GlobalConfigurationCategory getCategory() {
         return GlobalConfigurationCategory.get(AwsGlobalConfigurationCategory.class);
     }
@@ -58,5 +55,4 @@ public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration
         String className = t.getClass().getSimpleName();
         return className + ": " + StringUtils.defaultIfBlank(msg, "Unknown error");
     }
-
 }

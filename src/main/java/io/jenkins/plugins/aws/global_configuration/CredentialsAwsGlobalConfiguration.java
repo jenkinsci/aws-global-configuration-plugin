@@ -24,20 +24,6 @@
 
 package io.jenkins.plugins.aws.global_configuration;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Optional;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.Symbol;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.interceptor.RequirePOST;
-
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSSessionCredentials;
@@ -54,7 +40,6 @@ import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.ExtensionList;
@@ -63,7 +48,17 @@ import hudson.model.Failure;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Optional;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  * Store the AWS configuration to save it on a separate file
@@ -76,8 +71,8 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      * Session token duration in seconds.
      */
     @SuppressWarnings("FieldMayBeFinal")
-    private static int SESSION_DURATION = Integer.getInteger(CredentialsAwsGlobalConfiguration.class.getName() + ".sessionDuration",
-            3600);
+    private static int SESSION_DURATION =
+            Integer.getInteger(CredentialsAwsGlobalConfiguration.class.getName() + ".sessionDuration", 3600);
 
     /**
      * force the region to use for the presigned S3 URLs generated.
@@ -98,8 +93,7 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      * Testing only
      */
     @Restricted(NoExternalUse.class)
-    protected CredentialsAwsGlobalConfiguration(boolean test) {
-    }
+    protected CredentialsAwsGlobalConfiguration(boolean test) {}
 
     public String getRegion() {
         return region;
@@ -130,10 +124,11 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
 
     @CheckForNull
     public AmazonWebServicesCredentials getCredentials(@NonNull String credentialsId) {
-        Optional<AmazonWebServicesCredentials> credential = CredentialsProvider
-                .lookupCredentials(AmazonWebServicesCredentials.class, Jenkins.get(), ACL.SYSTEM,
-                        Collections.emptyList())
-                .stream().filter(it -> it.getId().equals(credentialsId)).findFirst();
+        Optional<AmazonWebServicesCredentials> credential = CredentialsProvider.lookupCredentials(
+                        AmazonWebServicesCredentials.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList())
+                .stream()
+                .filter(it -> it.getId().equals(credentialsId))
+                .findFirst();
         if (credential.isPresent()) {
             return credential.get();
         } else {
@@ -143,10 +138,11 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
 
     /**
      * create a AWS session credentials from a Key and a Secret configured in a AWS credential in Jenkins.
-     * 
+     *
      * @return the AWS session credential result of the request to the AWS token service.
      */
-    private AWSSessionCredentials sessionCredentialsFromKeyAndSecret(String region, @NonNull AmazonWebServicesCredentials jenkinsAwsCredentials) {
+    private AWSSessionCredentials sessionCredentialsFromKeyAndSecret(
+            String region, @NonNull AmazonWebServicesCredentials jenkinsAwsCredentials) {
         AWSCredentials awsCredentials = jenkinsAwsCredentials.getCredentials();
 
         if (awsCredentials instanceof AWSSessionCredentials) {
@@ -154,30 +150,30 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
         }
 
         AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
-        com.amazonaws.services.securitytoken.model.Credentials credentials = getSessionCredentials(credentialsProvider,
-                region);
+        com.amazonaws.services.securitytoken.model.Credentials credentials =
+                getSessionCredentials(credentialsProvider, region);
 
-        return new BasicSessionCredentials(credentials.getAccessKeyId(), credentials.getSecretAccessKey(),
-                credentials.getSessionToken());
+        return new BasicSessionCredentials(
+                credentials.getAccessKeyId(), credentials.getSecretAccessKey(), credentials.getSessionToken());
     }
 
     private Credentials getSessionCredentials(AWSCredentialsProvider credentialsProvider, String region) {
-        AWSSecurityTokenServiceClientBuilder tokenSvcBuilder = AWSSecurityTokenServiceClientBuilder.standard()
-                .withCredentials(credentialsProvider);
+        AWSSecurityTokenServiceClientBuilder tokenSvcBuilder =
+                AWSSecurityTokenServiceClientBuilder.standard().withCredentials(credentialsProvider);
         if (region != null) {
             tokenSvcBuilder.withRegion(region);
         }
         AWSSecurityTokenService tokenSvc = tokenSvcBuilder.build();
 
-        GetSessionTokenRequest sessionTokenRequest = new GetSessionTokenRequest()
-                .withDurationSeconds(getSessionDuration());
+        GetSessionTokenRequest sessionTokenRequest =
+                new GetSessionTokenRequest().withDurationSeconds(getSessionDuration());
         GetSessionTokenResult sessionToken = tokenSvc.getSessionToken(sessionTokenRequest);
         return sessionToken.getCredentials();
     }
 
     /**
      * creates an AWS session credentials from the instance profile or user AWS configuration (~/.aws)
-     * 
+     *
      * @return the AWS session credential from the instance profile or user AWS configuration.
      * @throws IOException
      *             in case ot error.
@@ -212,14 +208,15 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
     /**
      * Select the type of AWS credential that has to be created based on the configuration. If no AWS credential is
      * provided, the IAM instance profile or user AWS configuration is used to create the AWS credentials.
-     * 
+     *
      * @return An AWS session credential.
      * @throws IOException
      *             in case of error.
      */
-    public AWSSessionCredentials sessionCredentials(@NonNull AwsClientBuilder<?, ?> builder, String region,
-            String credentialsId) throws IOException {
-        AmazonWebServicesCredentials baseCredentials = StringUtils.isNotBlank(credentialsId) ? getCredentials(credentialsId) : null;
+    public AWSSessionCredentials sessionCredentials(
+            @NonNull AwsClientBuilder<?, ?> builder, String region, String credentialsId) throws IOException {
+        AmazonWebServicesCredentials baseCredentials =
+                StringUtils.isNotBlank(credentialsId) ? getCredentials(credentialsId) : null;
         if (baseCredentials != null) {
             return sessionCredentialsFromKeyAndSecret(region, baseCredentials);
         } else {
@@ -262,9 +259,12 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         ListBoxModel credentials = new ListBoxModel();
         credentials.add("IAM instance Profile/user AWS configuration", "");
-        credentials.addAll(
-                CredentialsProvider.listCredentials(AmazonWebServicesCredentials.class, Jenkins.get(), ACL.SYSTEM,
-                        Collections.emptyList(), CredentialsMatchers.instanceOf(AmazonWebServicesCredentials.class)));
+        credentials.addAll(CredentialsProvider.listCredentials(
+                AmazonWebServicesCredentials.class,
+                Jenkins.get(),
+                ACL.SYSTEM,
+                Collections.emptyList(),
+                CredentialsMatchers.instanceOf(AmazonWebServicesCredentials.class)));
         return credentials;
     }
 
@@ -278,5 +278,4 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
         }
         return FormValidation.ok();
     }
-
 }

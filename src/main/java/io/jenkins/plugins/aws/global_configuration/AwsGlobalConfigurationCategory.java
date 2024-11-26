@@ -46,5 +46,4 @@ public class AwsGlobalConfigurationCategory extends GlobalConfigurationCategory 
     public String getShortDescription() {
         return "AWS Configuration";
     }
-
 }
