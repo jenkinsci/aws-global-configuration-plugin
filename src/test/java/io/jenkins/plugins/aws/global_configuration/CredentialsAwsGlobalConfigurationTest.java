@@ -26,20 +26,18 @@ package io.jenkins.plugins.aws.global_configuration;
 
 import static org.junit.Assert.*;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.RestartableJenkinsRule;
-
 import com.amazonaws.regions.Regions;
 import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsImpl;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import hudson.util.FormValidation;
 import org.htmlunit.html.HtmlForm;
 import org.htmlunit.html.HtmlSelect;
-
-import hudson.util.FormValidation;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.RestartableJenkinsRule;
 
 public class CredentialsAwsGlobalConfigurationTest {
 
@@ -59,27 +57,40 @@ public class CredentialsAwsGlobalConfigurationTest {
     @Test
     public void uiAndStorage() {
         rr.then(r -> {
-            assertNull("not set initially", CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertNull(
+                    "not set initially", CredentialsAwsGlobalConfiguration.get().getRegion());
             JenkinsRule.WebClient wc = r.createWebClient();
             HtmlForm config = wc.goTo("aws").getFormByName("config");
             r.submit(config);
-            assertNull("round-trips to null", CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertNull(
+                    "round-trips to null",
+                    CredentialsAwsGlobalConfiguration.get().getRegion());
             config = wc.goTo("aws").getFormByName("config");
             HtmlSelect select = config.getSelectByName("_.region");
             select.setSelectedAttribute(Regions.SA_EAST_1.getName(), true);
             r.submit(config);
-            assertEquals("global config page let us edit it", Regions.SA_EAST_1.getName(), CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertEquals(
+                    "global config page let us edit it",
+                    Regions.SA_EAST_1.getName(),
+                    CredentialsAwsGlobalConfiguration.get().getRegion());
         });
         rr.then(r -> {
-            assertEquals("still there after restart of Jenkins", Regions.SA_EAST_1.getName(), CredentialsAwsGlobalConfiguration.get().getRegion());
+            assertEquals(
+                    "still there after restart of Jenkins",
+                    Regions.SA_EAST_1.getName(),
+                    CredentialsAwsGlobalConfiguration.get().getRegion());
         });
     }
 
     @Test
     public void credentials() {
         rr.then(r -> {
-            AmazonWebServicesCredentials credentials = new AWSCredentialsImpl(CredentialsScope.GLOBAL,
-                    "CredentialsAwsGlobalConfigurationTest", "xxx", "secret", "test credentials");
+            AmazonWebServicesCredentials credentials = new AWSCredentialsImpl(
+                    CredentialsScope.GLOBAL,
+                    "CredentialsAwsGlobalConfigurationTest",
+                    "xxx",
+                    "secret",
+                    "test credentials");
             SystemCredentialsProvider.getInstance().getCredentials().add(credentials);
             CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
             descriptor.setCredentialsId("CredentialsAwsGlobalConfigurationTest");
