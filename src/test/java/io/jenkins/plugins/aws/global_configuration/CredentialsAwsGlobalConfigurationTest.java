@@ -26,7 +26,6 @@ package io.jenkins.plugins.aws.global_configuration;
 
 import static org.junit.Assert.*;
 
-import com.amazonaws.regions.Regions;
 import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsImpl;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -38,6 +37,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.RestartableJenkinsRule;
+import software.amazon.awssdk.regions.Region;
 
 public class CredentialsAwsGlobalConfigurationTest {
 
@@ -67,17 +67,17 @@ public class CredentialsAwsGlobalConfigurationTest {
                     CredentialsAwsGlobalConfiguration.get().getRegion());
             config = wc.goTo("aws").getFormByName("config");
             HtmlSelect select = config.getSelectByName("_.region");
-            select.setSelectedAttribute(Regions.SA_EAST_1.getName(), true);
+            select.setSelectedAttribute(Region.SA_EAST_1.id(), true);
             r.submit(config);
             assertEquals(
                     "global config page let us edit it",
-                    Regions.SA_EAST_1.getName(),
+                    Region.SA_EAST_1.id(),
                     CredentialsAwsGlobalConfiguration.get().getRegion());
         });
         rr.then(r -> {
             assertEquals(
                     "still there after restart of Jenkins",
-                    Regions.SA_EAST_1.getName(),
+                    Region.SA_EAST_1.id(),
                     CredentialsAwsGlobalConfiguration.get().getRegion());
         });
     }
