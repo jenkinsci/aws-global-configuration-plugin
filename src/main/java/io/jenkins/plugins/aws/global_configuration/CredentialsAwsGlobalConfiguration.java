@@ -24,18 +24,9 @@
 
 package io.jenkins.plugins.aws.global_configuration;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSSessionCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.Credentials;
-import com.amazonaws.services.securitytoken.model.GetSessionTokenRequest;
-import com.amazonaws.services.securitytoken.model.GetSessionTokenResult;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -50,6 +41,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -59,6 +51,17 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.interceptor.RequirePOST;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.StsClientBuilder;
+import software.amazon.awssdk.services.sts.model.Credentials;
+import software.amazon.awssdk.services.sts.model.GetSessionTokenRequest;
+import software.amazon.awssdk.services.sts.model.GetSessionTokenResponse;
 
 /**
  * Store the AWS configuration to save it on a separate file
@@ -141,34 +144,34 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      *
      * @return the AWS session credential result of the request to the AWS token service.
      */
-    private AWSSessionCredentials sessionCredentialsFromKeyAndSecret(
+    private AwsSessionCredentials sessionCredentialsFromKeyAndSecret(
             String region, @NonNull AmazonWebServicesCredentials jenkinsAwsCredentials) {
-        AWSCredentials awsCredentials = jenkinsAwsCredentials.getCredentials();
+        AwsCredentials awsCredentials = jenkinsAwsCredentials.resolveCredentials();
 
-        if (awsCredentials instanceof AWSSessionCredentials) {
-            return (AWSSessionCredentials) awsCredentials;
+        if (awsCredentials instanceof AwsSessionCredentials) {
+            return (AwsSessionCredentials) awsCredentials;
         }
 
-        AWSCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(awsCredentials);
-        com.amazonaws.services.securitytoken.model.Credentials credentials =
+        AwsCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(awsCredentials);
+        software.amazon.awssdk.services.sts.model.Credentials credentials =
                 getSessionCredentials(credentialsProvider, region);
 
-        return new BasicSessionCredentials(
-                credentials.getAccessKeyId(), credentials.getSecretAccessKey(), credentials.getSessionToken());
+        return AwsSessionCredentials.create(
+                credentials.accessKeyId(), credentials.secretAccessKey(), credentials.sessionToken());
     }
 
-    private Credentials getSessionCredentials(AWSCredentialsProvider credentialsProvider, String region) {
-        AWSSecurityTokenServiceClientBuilder tokenSvcBuilder =
-                AWSSecurityTokenServiceClientBuilder.standard().withCredentials(credentialsProvider);
+    private Credentials getSessionCredentials(AwsCredentialsProvider credentialsProvider, String region) {
+        StsClientBuilder stsClientBuilder = StsClient.builder().credentialsProvider(credentialsProvider);
         if (region != null) {
-            tokenSvcBuilder.withRegion(region);
+            stsClientBuilder.region(Region.of(region));
         }
-        AWSSecurityTokenService tokenSvc = tokenSvcBuilder.build();
+        StsClient stsClient = stsClientBuilder.build();
 
-        GetSessionTokenRequest sessionTokenRequest =
-                new GetSessionTokenRequest().withDurationSeconds(getSessionDuration());
-        GetSessionTokenResult sessionToken = tokenSvc.getSessionToken(sessionTokenRequest);
-        return sessionToken.getCredentials();
+        GetSessionTokenRequest sessionTokenRequest = GetSessionTokenRequest.builder()
+                .durationSeconds(getSessionDuration())
+                .build();
+        GetSessionTokenResponse sessionToken = stsClient.getSessionToken(sessionTokenRequest);
+        return sessionToken.credentials();
     }
 
     /**
@@ -176,33 +179,26 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      *
      * @return the AWS session credential from the instance profile or user AWS configuration.
      * @throws IOException
-     *             in case ot error.
+     *             in case of error.
      */
-    private AWSSessionCredentials sessionCredentialsFromInstanceProfile(@NonNull AwsClientBuilder<?, ?> builder)
-            throws IOException {
-        AWSCredentialsProvider credentialsProvider = builder.getCredentials();
-        if (credentialsProvider == null) {
-            throw new IOException("This client builder has no associated credentials");
-        }
-        AWSCredentials awsCredentials = credentialsProvider.getCredentials();
+    private AwsSessionCredentials sessionCredentialsFromInstanceProfile() throws IOException {
+        try (DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create()) {
+            AwsCredentials awsCredentials = credentialsProvider.resolveCredentials();
 
-        if (awsCredentials == null) {
-            throw new IOException("Unable to get credentials from environment");
+            // Assume we are using session credentials
+            if (!(awsCredentials instanceof AwsSessionCredentials)) {
+                throw new IOException("No valid session credentials");
+            }
+            return (AwsSessionCredentials) awsCredentials;
         }
-
-        // Assume we are using session credentials
-        if (!(awsCredentials instanceof AWSSessionCredentials)) {
-            throw new IOException("No valid session credentials");
-        }
-        return (AWSSessionCredentials) awsCredentials;
     }
 
     /**
-     * Use {@link #sessionCredentials(AwsClientBuilder, String, String)}
+     * Use {@link #sessionCredentials(String, String)}
      */
     @Deprecated
     public AWSSessionCredentials sessionCredentials(@NonNull AwsClientBuilder<?, ?> builder) throws IOException {
-        return sessionCredentials(builder, this.getRegion(), this.getCredentialsId());
+        return fromAwsSessionCredentials(sessionCredentials(this.getRegion(), this.getCredentialsId()));
     }
 
     /**
@@ -213,15 +209,33 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      * @throws IOException
      *             in case of error.
      */
-    public AWSSessionCredentials sessionCredentials(
-            @NonNull AwsClientBuilder<?, ?> builder, String region, String credentialsId) throws IOException {
+    public AwsSessionCredentials sessionCredentials(String region, String credentialsId) throws IOException {
         AmazonWebServicesCredentials baseCredentials =
                 StringUtils.isNotBlank(credentialsId) ? getCredentials(credentialsId) : null;
         if (baseCredentials != null) {
             return sessionCredentialsFromKeyAndSecret(region, baseCredentials);
         } else {
-            return sessionCredentialsFromInstanceProfile(builder);
+            return sessionCredentialsFromInstanceProfile();
         }
+    }
+
+    /**
+     * @deprecated use {@link #sessionCredentials(String, String)}
+     */
+    @Deprecated
+    public AWSSessionCredentials sessionCredentials(
+            @NonNull AwsClientBuilder<?, ?> builder, String region, String credentialsId) throws IOException {
+        return fromAwsSessionCredentials(sessionCredentials(region, credentialsId));
+    }
+
+    private static AWSSessionCredentials fromAwsSessionCredentials(AwsSessionCredentials awsSessionCredentials) {
+        Objects.requireNonNull(awsSessionCredentials);
+        return new BasicSessionCredentials(
+                awsSessionCredentials.accessKeyId(),
+                awsSessionCredentials.secretAccessKey(),
+                awsSessionCredentials.sessionToken(),
+                awsSessionCredentials.accountId().orElse(null),
+                awsSessionCredentials.providerName().orElse(null));
     }
 
     private void checkValue(@NonNull FormValidation formValidation) {
@@ -248,8 +262,8 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
     public ListBoxModel doFillRegionItems() {
         ListBoxModel regions = new ListBoxModel();
         regions.add("Auto", "");
-        for (Regions s : Regions.values()) {
-            regions.add(s.getDescription(), s.getName());
+        for (Region s : Region.regions()) {
+            regions.add(s.id(), s.id());
         }
         return regions;
     }
@@ -270,9 +284,7 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
 
     public FormValidation doCheckRegion(@QueryParameter String region) {
         if (StringUtils.isNotBlank(region)) {
-            try {
-                Regions.fromName(region);
-            } catch (IllegalArgumentException x) {
+            if (Region.regions().stream().noneMatch(r -> r.id().equals(region))) {
                 return FormValidation.error("Region is not valid");
             }
         }
