@@ -60,8 +60,8 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>aws-credentials</artifactId>
-      <!-- TODO https://github.com/jenkinsci/aws-credentials-plugin/pull/254 -->
-      <version>238.vb_3ee75763c24</version>
+      <!-- TODO until in BOM -->
+      <version>238.v8fb_588a_2b_e67</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
