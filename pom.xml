@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.86</version>
+    <version>4.88</version>
     <relativePath />
   </parent>
 
@@ -32,7 +32,9 @@
 
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
-    <jenkins.version>2.401.3</jenkins.version>
+    <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+    <jenkins.baseline>2.452</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.4</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.threshold>Low</spotbugs.threshold>
     <spotless.check.skip>false</spotless.check.skip>
@@ -42,8 +44,8 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.401.x</artifactId>
-        <version>2671.va_73a_b_4c103fb_</version>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
+        <version>3761.vd922730f0fd2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -52,8 +54,14 @@
 
   <dependencies>
     <dependency>
+      <groupId>io.jenkins.plugins.aws-java-sdk2</groupId>
+      <artifactId>aws-java-sdk2-sts</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>aws-credentials</artifactId>
+      <!-- TODO until in BOM -->
+      <version>238.v8fb_588a_2b_e67</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
