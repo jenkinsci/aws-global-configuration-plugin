@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import jenkins.model.Jenkins;
+import jenkins.util.SetContextClassLoader;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
@@ -182,7 +183,8 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      *             in case of error.
      */
     private AwsSessionCredentials sessionCredentialsFromInstanceProfile() throws IOException {
-        try (DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create()) {
+        try (SetContextClassLoader sccl = new SetContextClassLoader(CredentialsAwsGlobalConfiguration.class);
+                DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create()) {
             AwsCredentials awsCredentials = credentialsProvider.resolveCredentials();
 
             // Assume we are using session credentials
