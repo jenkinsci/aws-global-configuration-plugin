@@ -182,15 +182,14 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      *             in case of error.
      */
     private AwsSessionCredentials sessionCredentialsFromInstanceProfile() throws IOException {
-        try (DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create()) {
-            AwsCredentials awsCredentials = credentialsProvider.resolveCredentials();
+        DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
+        AwsCredentials awsCredentials = credentialsProvider.resolveCredentials();
 
-            // Assume we are using session credentials
-            if (!(awsCredentials instanceof AwsSessionCredentials)) {
-                throw new IOException("No valid session credentials");
-            }
-            return (AwsSessionCredentials) awsCredentials;
+        // Assume we are using session credentials
+        if (!(awsCredentials instanceof AwsSessionCredentials)) {
+            throw new IOException("No valid session credentials");
         }
+        return (AwsSessionCredentials) awsCredentials;
     }
 
     /**
