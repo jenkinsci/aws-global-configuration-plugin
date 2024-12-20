@@ -45,25 +45,9 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>3761.vd922730f0fd2</version>
+        <version>3850.vb_c5319efa_e29</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>io.jenkins.plugins.aws-java-sdk2</groupId>
-        <artifactId>aws-java-sdk2-core</artifactId>
-        <version>2.29.34-9.v117ff2a_65538</version>
-      </dependency>
-      <!-- TODO until in BOM -->
-      <dependency>
-        <groupId>io.jenkins.plugins.aws-java-sdk2</groupId>
-        <artifactId>aws-java-sdk2-ec2</artifactId>
-        <version>2.29.34-9.v117ff2a_65538</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>aws-credentials</artifactId>
-        <version>239.v6681a_0ea_46ef</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
