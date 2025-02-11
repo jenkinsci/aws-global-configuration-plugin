@@ -9,16 +9,16 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.ManagementLink;
 import hudson.util.FormApply;
+import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.ServletException;
 import jenkins.model.GlobalConfigurationCategory;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerRequest2;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.verb.POST;
 
 /**
@@ -64,7 +64,7 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
     }
 
     @POST
-    public synchronized void doConfigure(StaplerRequest req, StaplerResponse rsp)
+    public synchronized void doConfigure(StaplerRequest2 req, StaplerResponse2 rsp)
             throws IOException, ServletException, Descriptor.FormException {
         Jenkins.get().checkPermission(Jenkins.ADMINISTER);
         // for compatibility reasons, the actual value is stored in Jenkins
@@ -79,7 +79,7 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
         }
     }
 
-    public boolean configure(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
+    public boolean configure(StaplerRequest2 req, JSONObject json) throws Descriptor.FormException {
         boolean result = true;
         for (Descriptor<?> d : Functions.getSortedDescriptorsForGlobalConfigByDescriptor(
                 descriptor -> FILTER.apply(descriptor.getCategory()))) {
@@ -89,7 +89,7 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
         return result;
     }
 
-    private boolean configureDescriptor(StaplerRequest req, JSONObject json, Descriptor<?> d)
+    private boolean configureDescriptor(StaplerRequest2 req, JSONObject json, Descriptor<?> d)
             throws Descriptor.FormException {
         // collapse the structure to remain backward compatible with the JSON structure before 1.
         String name = d.getJsonSafeClassName();
