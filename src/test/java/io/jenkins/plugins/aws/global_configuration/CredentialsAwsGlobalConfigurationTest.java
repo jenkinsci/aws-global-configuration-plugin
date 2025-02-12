@@ -24,7 +24,8 @@
 
 package io.jenkins.plugins.aws.global_configuration;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.cloudbees.jenkins.plugins.awscredentials.AWSCredentialsImpl;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
@@ -33,68 +34,55 @@ import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import hudson.util.FormValidation;
 import org.htmlunit.html.HtmlForm;
 import org.htmlunit.html.HtmlSelect;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.JenkinsSessionRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 import software.amazon.awssdk.regions.Region;
 
-public class CredentialsAwsGlobalConfigurationTest {
-
-    @Rule
-    public JenkinsSessionRule rr = new JenkinsSessionRule();
+@WithJenkins
+class CredentialsAwsGlobalConfigurationTest {
 
     @Test
-    public void doCheckRegion() throws Throwable {
-        rr.then(r -> {
-            CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
-            assertEquals(descriptor.doCheckRegion("").kind, FormValidation.Kind.OK);
-            assertEquals(descriptor.doCheckRegion("us-west-1").kind, FormValidation.Kind.OK);
-            assertEquals(descriptor.doCheckRegion("no-valid").kind, FormValidation.Kind.ERROR);
-        });
+    void doCheckRegion(JenkinsRule r) {
+        CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckRegion("").kind);
+        assertEquals(FormValidation.Kind.OK, descriptor.doCheckRegion("us-west-1").kind);
+        assertEquals(FormValidation.Kind.ERROR, descriptor.doCheckRegion("no-valid").kind);
     }
 
     @Test
-    public void uiAndStorage() throws Throwable {
-        rr.then(r -> {
-            assertNull(
-                    "not set initially", CredentialsAwsGlobalConfiguration.get().getRegion());
-            JenkinsRule.WebClient wc = r.createWebClient();
-            HtmlForm config = wc.goTo("aws").getFormByName("config");
-            r.submit(config);
-            assertNull(
-                    "round-trips to null",
-                    CredentialsAwsGlobalConfiguration.get().getRegion());
-            config = wc.goTo("aws").getFormByName("config");
-            HtmlSelect select = config.getSelectByName("_.region");
-            select.setSelectedAttribute(Region.SA_EAST_1.id(), true);
-            r.submit(config);
-            assertEquals(
-                    "global config page let us edit it",
-                    Region.SA_EAST_1.id(),
-                    CredentialsAwsGlobalConfiguration.get().getRegion());
-        });
-        rr.then(r -> assertEquals(
-                "still there after restart of Jenkins",
+    void uiAndStorage(JenkinsRule r) throws Throwable {
+        assertNull(CredentialsAwsGlobalConfiguration.get().getRegion(), "not set initially");
+        JenkinsRule.WebClient wc = r.createWebClient();
+        HtmlForm config = wc.goTo("aws").getFormByName("config");
+        r.submit(config);
+        assertNull(CredentialsAwsGlobalConfiguration.get().getRegion(), "round-trips to null");
+        config = wc.goTo("aws").getFormByName("config");
+        HtmlSelect select = config.getSelectByName("_.region");
+        select.setSelectedAttribute(Region.SA_EAST_1.id(), true);
+        r.submit(config);
+        assertEquals(
                 Region.SA_EAST_1.id(),
-                CredentialsAwsGlobalConfiguration.get().getRegion()));
+                CredentialsAwsGlobalConfiguration.get().getRegion(),
+                "global config page let us edit it");
+
+        r.restart();
+
+        assertEquals(
+                Region.SA_EAST_1.id(),
+                CredentialsAwsGlobalConfiguration.get().getRegion(),
+                "still there after restart of Jenkins");
     }
 
     @Test
-    public void credentials() throws Throwable {
-        rr.then(r -> {
-            AmazonWebServicesCredentials credentials = new AWSCredentialsImpl(
-                    CredentialsScope.GLOBAL,
-                    "CredentialsAwsGlobalConfigurationTest",
-                    "xxx",
-                    "secret",
-                    "test credentials");
-            SystemCredentialsProvider.getInstance().getCredentials().add(credentials);
-            CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
-            descriptor.setCredentialsId("CredentialsAwsGlobalConfigurationTest");
-            assertEquals(credentials, descriptor.getCredentials());
-            descriptor.setCredentialsId("");
-            assertNull(descriptor.getCredentials());
-        });
+    void credentials(JenkinsRule r) {
+        AmazonWebServicesCredentials credentials = new AWSCredentialsImpl(
+                CredentialsScope.GLOBAL, "CredentialsAwsGlobalConfigurationTest", "xxx", "secret", "test credentials");
+        SystemCredentialsProvider.getInstance().getCredentials().add(credentials);
+        CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
+        descriptor.setCredentialsId("CredentialsAwsGlobalConfigurationTest");
+        assertEquals(credentials, descriptor.getCredentials());
+        descriptor.setCredentialsId("");
+        assertNull(descriptor.getCredentials());
     }
 }
