@@ -36,16 +36,16 @@ import org.htmlunit.html.HtmlSelect;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.RestartableJenkinsRule;
+import org.jvnet.hudson.test.JenkinsSessionRule;
 import software.amazon.awssdk.regions.Region;
 
 public class CredentialsAwsGlobalConfigurationTest {
 
     @Rule
-    public RestartableJenkinsRule rr = new RestartableJenkinsRule();
+    public JenkinsSessionRule rr = new JenkinsSessionRule();
 
     @Test
-    public void doCheckRegion() {
+    public void doCheckRegion() throws Throwable {
         rr.then(r -> {
             CredentialsAwsGlobalConfiguration descriptor = CredentialsAwsGlobalConfiguration.get();
             assertEquals(descriptor.doCheckRegion("").kind, FormValidation.Kind.OK);
@@ -55,7 +55,7 @@ public class CredentialsAwsGlobalConfigurationTest {
     }
 
     @Test
-    public void uiAndStorage() {
+    public void uiAndStorage() throws Throwable {
         rr.then(r -> {
             assertNull(
                     "not set initially", CredentialsAwsGlobalConfiguration.get().getRegion());
@@ -74,16 +74,14 @@ public class CredentialsAwsGlobalConfigurationTest {
                     Region.SA_EAST_1.id(),
                     CredentialsAwsGlobalConfiguration.get().getRegion());
         });
-        rr.then(r -> {
-            assertEquals(
-                    "still there after restart of Jenkins",
-                    Region.SA_EAST_1.id(),
-                    CredentialsAwsGlobalConfiguration.get().getRegion());
-        });
+        rr.then(r -> assertEquals(
+                "still there after restart of Jenkins",
+                Region.SA_EAST_1.id(),
+                CredentialsAwsGlobalConfiguration.get().getRegion()));
     }
 
     @Test
-    public void credentials() {
+    public void credentials() throws Throwable {
         rr.then(r -> {
             AmazonWebServicesCredentials credentials = new AWSCredentialsImpl(
                     CredentialsScope.GLOBAL,
