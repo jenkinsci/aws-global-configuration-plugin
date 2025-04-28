@@ -57,6 +57,7 @@ import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.RegionMetadata;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.StsClientBuilder;
 import software.amazon.awssdk.services.sts.model.Credentials;
@@ -262,7 +263,8 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
         ListBoxModel regions = new ListBoxModel();
         regions.add("Auto", "");
         for (Region s : Region.regions()) {
-            regions.add(s.id(), s.id());
+            RegionMetadata regionMetadata = RegionMetadata.of(s);
+            regions.add(regionMetadata != null ? regionMetadata.description() : s.id(), s.id());
         }
         return regions;
     }
