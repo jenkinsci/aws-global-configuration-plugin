@@ -24,9 +24,6 @@
 
 package io.jenkins.plugins.aws.global_configuration;
 
-import com.amazonaws.auth.AWSSessionCredentials;
-import com.amazonaws.auth.BasicSessionCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.cloudbees.jenkins.plugins.awscredentials.AmazonWebServicesCredentials;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -41,7 +38,6 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Optional;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -194,14 +190,6 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
     }
 
     /**
-     * Use {@link #sessionCredentials(String, String)}
-     */
-    @Deprecated
-    public AWSSessionCredentials sessionCredentials(@NonNull AwsClientBuilder<?, ?> builder) throws IOException {
-        return fromAwsSessionCredentials(sessionCredentials(this.getRegion(), this.getCredentialsId()));
-    }
-
-    /**
      * Select the type of AWS credential that has to be created based on the configuration. If no AWS credential is
      * provided, the IAM instance profile or user AWS configuration is used to create the AWS credentials.
      *
@@ -217,25 +205,6 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
         } else {
             return sessionCredentialsFromInstanceProfile();
         }
-    }
-
-    /**
-     * @deprecated use {@link #sessionCredentials(String, String)}
-     */
-    @Deprecated
-    public AWSSessionCredentials sessionCredentials(
-            @NonNull AwsClientBuilder<?, ?> builder, String region, String credentialsId) throws IOException {
-        return fromAwsSessionCredentials(sessionCredentials(region, credentialsId));
-    }
-
-    private static AWSSessionCredentials fromAwsSessionCredentials(AwsSessionCredentials awsSessionCredentials) {
-        Objects.requireNonNull(awsSessionCredentials);
-        return new BasicSessionCredentials(
-                awsSessionCredentials.accessKeyId(),
-                awsSessionCredentials.secretAccessKey(),
-                awsSessionCredentials.sessionToken(),
-                awsSessionCredentials.accountId().orElse(null),
-                awsSessionCredentials.providerName().orElse(null));
     }
 
     private void checkValue(@NonNull FormValidation formValidation) {
