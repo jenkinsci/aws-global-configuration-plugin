@@ -12,14 +12,14 @@ def f=namespace(lib.FormTagLib)
 def l=namespace(lib.LayoutTagLib)
 def st=namespace("jelly:stapler")
 
-l.layout(norefresh:true, permission:app.ADMINISTER, title:my.displayName, cssclass:request2.getParameter('decorate')) {
+l.layout(norefresh:true, permission:app.ADMINISTER, title:my.displayName, cssclass:request2.getParameter('decorate'), type: 'one-column') {
     l.main_panel {
         h1 {
             text(my.displayName)
         }
 
-        p()
-        div(class:"behavior-loading", _("LOADING"))
+        l.skeleton()
+
         f.form(method:"post",name:"config",action:"configure") {
             set("instance",my);
             set("descriptor", my.descriptor);
