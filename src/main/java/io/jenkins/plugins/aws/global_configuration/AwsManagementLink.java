@@ -50,7 +50,7 @@ public class AwsManagementLink extends ManagementLink implements Describable<Aws
 
     @Override
     public String getDescription() {
-        return "Amazon Web Services Configuration";
+        return "Configuration for Amazon Web Services.";
     }
 
     @Override
