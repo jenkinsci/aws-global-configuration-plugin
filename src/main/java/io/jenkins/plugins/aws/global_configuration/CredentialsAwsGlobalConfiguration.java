@@ -44,7 +44,6 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -117,7 +116,7 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
 
     @DataBoundSetter
     public void setCredentialsId(@CheckForNull String credentialsId) {
-        this.credentialsId = StringUtils.defaultIfBlank(credentialsId, null);
+        this.credentialsId = (credentialsId == null || credentialsId.isBlank()) ? null : credentialsId;
         save();
     }
 
@@ -211,7 +210,7 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
      */
     public AwsSessionCredentials sessionCredentials(String region, String credentialsId) throws IOException {
         AmazonWebServicesCredentials baseCredentials =
-                StringUtils.isNotBlank(credentialsId) ? getCredentials(credentialsId) : null;
+                (credentialsId != null && !credentialsId.isBlank()) ? getCredentials(credentialsId) : null;
         if (baseCredentials != null) {
             return sessionCredentialsFromKeyAndSecret(region, baseCredentials);
         } else {
@@ -284,7 +283,7 @@ public final class CredentialsAwsGlobalConfiguration extends AbstractAwsGlobalCo
     }
 
     public FormValidation doCheckRegion(@QueryParameter String region) {
-        if (StringUtils.isNotBlank(region)) {
+        if (region != null && !region.isBlank()) {
             if (Region.regions().stream().noneMatch(r -> r.id().equals(region))) {
                 return FormValidation.error("Region is not valid");
             }

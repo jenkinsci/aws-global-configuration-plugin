@@ -28,7 +28,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.GlobalConfigurationCategory;
-import org.apache.commons.lang.StringUtils;
 
 public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration {
 
@@ -53,6 +52,6 @@ public abstract class AbstractAwsGlobalConfiguration extends GlobalConfiguration
 
         String msg = t.getMessage();
         String className = t.getClass().getSimpleName();
-        return className + ": " + StringUtils.defaultIfBlank(msg, "Unknown error");
+        return className + ": " + ((msg == null || msg.isBlank()) ? "Unknown error" : msg);
     }
 }
